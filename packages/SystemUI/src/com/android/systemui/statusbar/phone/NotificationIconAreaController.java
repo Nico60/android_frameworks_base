@@ -18,6 +18,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -43,6 +44,9 @@ public class NotificationIconAreaController implements DarkReceiver {
     private final Rect mTintArea = new Rect();
     private NotificationStackScrollLayout mNotificationScrollLayout;
     private Context mContext;
+
+    private int mClockAndDateWidth;
+    private boolean mCenterClock;
 
     public NotificationIconAreaController(Context context, StatusBar statusBar) {
         mStatusBar = statusBar;
@@ -86,6 +90,14 @@ public class NotificationIconAreaController implements DarkReceiver {
             View child = mShelfIcons.getChildAt(i);
             child.setLayoutParams(params);
         }
+    }
+
+    public void setClockAndDateStatus(int width, int mode, boolean enabled) {
+        if (mNotificationIcons != null) {
+            mNotificationIcons.setClockAndDateStatus(width, mode, enabled);
+        }
+        mClockAndDateWidth = width;
+        mCenterClock = mode == Clock.STYLE_CLOCK_CENTER && enabled;
     }
 
     @NonNull

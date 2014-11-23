@@ -37,6 +37,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlphaOptimizedFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ViewState;
@@ -124,6 +125,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private Vibrator mVibrator;
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
     private int mDarkOffsetX;
+    private int mClockAndDateWidth;
+    private boolean mClockCenter;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -151,6 +154,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         super.onConfigurationChanged(newConfig);
         initDimens();
     }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         float centerY = getHeight() / 2.0f;
@@ -448,6 +452,11 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         if (DEBUG) {
             invalidate();
         }
+    }
+
+    public void setClockAndDateStatus(int width, int mode, boolean enabled) {
+        mClockAndDateWidth = width;
+        mClockCenter = mode == Clock.STYLE_CLOCK_CENTER && enabled;
     }
 
     public int getActualWidth() {

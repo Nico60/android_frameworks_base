@@ -78,6 +78,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mCustomCarrierLabel;
     private int mShowCarrierLabel;
 
+    // Center clock
+    private LinearLayout mCenterClockLayout;
+    private int mClockStyle;
+
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
         public void setIsAirplaneMode(NetworkController.IconState icon) {
@@ -127,10 +131,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     public void updateSettings(boolean animate) {
-        mShowCarrierLabel = Settings.System.getIntForUser(
-                getContext().getContentResolver(), Settings.System.STATUS_BAR_CARRIER, 1,
+        ContentResolver resolver = getContext().getContentResolver();
+        mShowCarrierLabel = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_CARRIER, 1,
+                UserHandle.USER_CURRENT);
+        mClockStyle = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUSBAR_CLOCK_STYLE, 0,
                 UserHandle.USER_CURRENT);
         setCarrierLabel(animate);
+        setClockCenterVisibility(animate);
     }
 
     @Override
@@ -152,6 +161,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mSignalClusterView = mStatusBar.findViewById(R.id.signal_cluster);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
         mCustomCarrierLabel = mStatusBar.findViewById(R.id.statusbar_carrier_text);
+        mCenterClockLayout = (LinearLayout)mStatusBar.findViewById(R.id.center_clock_layout);
         updateSettings(false);
         // Default to showing until we know otherwise.
         showSystemIconArea(false);
@@ -213,17 +223,21 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if ((diff1 & DISABLE_SYSTEM_INFO) != 0) {
             if ((state1 & DISABLE_SYSTEM_INFO) != 0) {
                 hideSystemIconArea(animate);
+                hideCenterClock(animate);
             } else {
                 showSystemIconArea(animate);
+                showCenterClock(animate);
             }
         }
         if ((diff1 & DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state1 & DISABLE_NOTIFICATION_ICONS) != 0) {
                 hideNotificationIconArea(animate);
                 hideCarrierName(animate);
+                hideCenterClock(animate);
             } else {
                 showNotificationIconArea(animate);
                 showCarrierName(animate);
+                showCenterClock(animate);
             }
         }
     }
@@ -281,6 +295,18 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void showCarrierName(boolean animate) {
         if (mCustomCarrierLabel != null) {
             setCarrierLabel(animate);
+        }
+    }
+
+    public void hideCenterClock(boolean animate) {
+        if (mCenterClockLayout != null) {
+            animateHide(mCenterClockLayout, animate, true);
+        }
+    }
+
+    public void showCenterClock(boolean animate) {
+        if (mCenterClockLayout != null) {
+            setClockCenterVisibility(animate);
         }
     }
 
@@ -366,6 +392,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             animateShow(mCustomCarrierLabel, animate);
         } else {
             animateHide(mCustomCarrierLabel, animate, false);
+        }
+    }
+
+    public void setClockCenterVisibility(boolean animate) {
+        if (mClockStyle == 1) {
+            animateShow(mCenterClockLayout, animate);
+        } else {
+            animateHide(mCenterClockLayout, animate, false);
         }
     }
 }
