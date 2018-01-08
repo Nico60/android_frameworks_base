@@ -4117,6 +4117,13 @@ public final class Settings {
         public static final String QS_TILE_STYLE = "qs_tile_style";
 
         /**
+         * 0 - fullscreen
+         * 1 - partial
+         * @hide
+         */
+        public static final String SCREENSHOT_DEFAULT_MODE = "screenshot_default_mode";
+
+        /**
          * Custom Ambient tilt gesture
          * @hide
          */
@@ -4128,7 +4135,7 @@ public final class Settings {
          */
         public static final String CUSTOM_AMBIENT_HANDWAVE_GESTURE = "custom_ambient_handwave_gesture";
 
-         /**
+        /**
          * Custom Ambient pocketmode gesture
          * @hide
          */
