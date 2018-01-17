@@ -17,11 +17,14 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.FontSizeUtils;
+import com.android.systemui.R;
 
 public class ClockCenter extends Clock {
 
@@ -37,10 +40,32 @@ public class ClockCenter extends Clock {
         super(context, attrs, defStyle);
     }
 
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        setTextColor(DarkIconDispatcher.getTint(area, this, tint));
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
+        setPaddingRelative(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_starting_padding),
+                0,
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_end_padding),
+                0);
+    }
+
+    @Override
     protected void updateClockVisibility() {
-        boolean visible = mClockVisibleByPolicy && mClockVisibleByUser && (mClockStyle == STYLE_CLOCK_RIGHT && mShowClock);
+        boolean visible = mClockVisibleByPolicy && mClockVisibleByUser;
         Dependency.get(IconLogger.class).onIconVisibility("clock", visible);
-        int visibility = visible ? View.VISIBLE : View.GONE;
-        setVisibility(visibility);
+        int visibility = visible ? (mShowClock ? View.VISIBLE : View.GONE) : View.GONE;
+        if (mClockStyle == STYLE_CLOCK_CENTER) {
+            setVisibility(visibility);
+        } else {
+            setVisibility(View.GONE);
+        }
     }
 }

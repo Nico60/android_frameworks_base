@@ -241,7 +241,6 @@ import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChan
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
@@ -456,12 +455,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     // viewgroup containing the normal contents of the statusbar
     LinearLayout mStatusBarContent;
-
-    // center clock
-    LinearLayout mCenterClockLayout;
-
-    private boolean mShowClock;
-    private int mClockLocation;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1159,12 +1152,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                         CollapsedStatusBarFragment.TAG)
                 .commit();
         mIconController = Dependency.get(StatusBarIconController.class);
-
-        mCenterClockLayout = (LinearLayout)mStatusBarView.findViewById(R.id.center_clock_layout);
-        Clock cclock = (Clock) mStatusBarView.findViewById(R.id.center_clock);
-        if (cclock != null) {
-            cclock.setStatusBar(this);
-        }
 
         mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow, mGroupManager);
         mHeadsUpManager.setBar(this);
@@ -2740,26 +2727,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.endSection();
     }
 
-
-
-    public void showClock(boolean show) {
-        if (mStatusBarView == null) return;
-        ContentResolver resolver = mContext.getContentResolver();
-        View clock = mStatusBarView.findViewById(R.id.clock);
-        View cclock = mStatusBarView.findViewById(R.id.center_clock);
-        if (mClockLocation == 0 && clock != null) {
-            clock.setVisibility(show ? (mShowClock ? View.VISIBLE : View.GONE) : View.GONE);
-        }
-        if (mClockLocation == 1 && cclock != null) {
-            cclock.setVisibility(show ? (mShowClock ? View.VISIBLE : View.GONE) : View.GONE);
-        }
-    }
-
-    public void setClockAndDateStatus(int width, int mode, boolean enabled) {
-        mClockLocation = mode;
-        mShowClock = enabled;
-	}
-
     private void updateReportRejectedTouchVisibility() {
         if (mReportRejectedTouch == null) {
             return;
@@ -2815,10 +2782,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         flagdbg.append(0 != ((diff2  & StatusBarManager.DISABLE2_QUICK_SETTINGS))       ? '!' : ' ');
         flagdbg.append('>');
         Log.d(TAG, flagdbg.toString());
-
-        if ((diff1 & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-            mCenterClockLayout.animate().cancel();
-        }
 
         if ((diff1 & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state1 & StatusBarManager.DISABLE_EXPAND) != 0) {
