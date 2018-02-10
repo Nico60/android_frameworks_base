@@ -93,6 +93,7 @@ import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -870,6 +871,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ScreenLifecycle mScreenLifecycle;
     @VisibleForTesting WakefulnessLifecycle mWakefulnessLifecycle;
 
+    // Notifications style
+    private IBinder mToken = new Binder();
+
     private void recycleAllVisibilityObjects(ArraySet<NotificationVisibility> array) {
         final int N = array.size();
         for (int i = 0 ; i < N; i++) {
@@ -1482,6 +1486,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         reevaluateStyles();
     }
 
+    private void reloadAssets() {
+        reinflateViews();
+        updateNotificationsOnOverlayChanged();
+        mStackScroller.onOverlayChanged();
+        mNotificationShelf.onOverlayChanged();
+        mNotificationPanel.onOverlayChanged();
+        Dependency.get(DarkIconDispatcher.class).onOverlayChanged(mContext);
+    }
+
     private void reinflateViews() {
         reevaluateStyles();
 
@@ -1525,6 +1538,20 @@ public class StatusBar extends SystemUI implements DemoMode,
             boolean exposedGuts = mNotificationGutsExposed != null
                     && entry.row.getGuts() == mNotificationGutsExposed;
             entry.row.onDensityOrFontScaleChanged();
+            if (exposedGuts) {
+                mNotificationGutsExposed = entry.row.getGuts();
+                bindGuts(entry.row, mGutsMenuItem);
+            }
+        }
+    }
+
+    private void updateNotificationsOnOverlayChanged() {
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        for (int i = 0; i < activeNotifications.size(); i++) {
+            Entry entry = activeNotifications.get(i);
+            boolean exposedGuts = mNotificationGutsExposed != null
+                    && entry.row.getGuts() == mNotificationGutsExposed;
+            entry.row.onOverlayChanged();
             if (exposedGuts) {
                 mNotificationGutsExposed = entry.row.getGuts();
                 bindGuts(entry.row, mGutsMenuItem);
@@ -5122,7 +5149,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             unfuckBlackWhiteAccent();
         }
         if (isUsingDarkTheme() != useDarkTheme) {
+            disableBars();
             ThemeAccentUtils.setLightDarkTheme(mOverlayManager, mCurrentUserId, useDarkTheme);
+            reloadAssets();
+            mHandler.postDelayed(() -> enableBars(), 1000);
         }
 
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
@@ -5163,6 +5193,28 @@ public class StatusBar extends SystemUI implements DemoMode,
     // Unload all the theme accents
     public void unloadAccents() {
         ThemeAccentUtils.unloadAccents(mOverlayManager, mCurrentUserId);
+    }
+
+    private void disableBars(){
+        try{
+            if (mBarService != null) {
+                int flags = StatusBarManager.DISABLE_MASK
+                        & (~StatusBarManager.DISABLE_BACK)
+                        & (~StatusBarManager.DISABLE_HOME)
+                        & (~StatusBarManager.DISABLE_RECENT);
+                mBarService.disable(flags, mToken, "com.android.systemui");
+            }
+        } catch (RemoteException ex) {
+        }
+    }
+
+    private void enableBars(){
+        try{
+            if (mBarService != null) {
+                mBarService.disable(StatusBarManager.DISABLE_NONE, mToken, "com.android.systemui");
+            }
+        } catch (RemoteException ex) {
+        }
     }
 
     private void updateDozingState() {
