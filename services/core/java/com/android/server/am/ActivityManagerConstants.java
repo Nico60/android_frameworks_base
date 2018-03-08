@@ -237,7 +237,7 @@ final class ActivityManagerConstants extends ContentObserver {
     public int CUR_MAX_CACHED_PROCESSES;
 
     static final boolean USE_TRIM_SETTINGS =
-            SystemProperties.getBoolean("ro.vendor.qti.sys.fw.use_trim_settings", true);
+            SystemProperties.getBoolean("ro.vendor.qti.sys.fw.use_trim_settings", false);
     static final int EMPTY_APP_PERCENT =
             SystemProperties.getInt("ro.vendor.qti.sys.fw.empty_app_percent", 50);
     static final int TRIM_EMPTY_PERCENT =
@@ -245,7 +245,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final int TRIM_CACHE_PERCENT =
             SystemProperties.getInt("ro.vendor.qti.sys.fw.trim_cache_percent", 100);
     static final long TRIM_ENABLE_MEMORY =
-            SystemProperties.getLong("ro.vendor.qti.sys.fw.trim_enable_memory",1073741824);
+            SystemProperties.getLong("ro.vendor.qti.sys.fw.trim_enable_memory", 1073741824);
 
     // The maximum number of empty app processes we will let sit around.
     public int CUR_MAX_EMPTY_PROCESSES;
