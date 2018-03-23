@@ -1061,4 +1061,11 @@ public class NotificationColorUtil {
         }
 
     }
+
+    /**
+     * Convert alpha integer to float.
+     */
+    public static float alphaIntToFloat(int alpha) {
+        return (float) Math.max(0, Math.min(255, alpha)) / 255;
+    }
 }

@@ -34,6 +34,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.MathUtils;
@@ -50,6 +52,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.util.du.Utils;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
@@ -1664,6 +1667,23 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setAlpha(alpha);
     }
+
+
+    /*private void updateNotificationTranslucency() {
+        //float alpha = 1f;
+        int intAlpha = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_PANEL_BG_ALPHA, 255,
+                UserHandle.USER_CURRENT);
+        float floatAlpha = NotificationColorUtil.alphaIntToFloat(intAlpha);
+        if (mClosingWithAlphaFadeOut && !mExpandingFromHeadsUp && !mHeadsUpManager.hasPinnedHeadsUp()) {
+            //alpha = getFadeoutAlpha();
+            mNotificationStackScroller.setAlpha(getFadeoutAlpha());
+        } else if (mPanelExpanded) {
+            mNotificationStackScroller.setAlpha(floatAlpha);
+        } else {
+            mNotificationStackScroller.setAlpha(1.0f);
+        }
+    }*/
 
     private float getFadeoutAlpha() {
         float alpha = (getNotificationsTopY() + mNotificationStackScroller.getFirstItemMinHeight())
