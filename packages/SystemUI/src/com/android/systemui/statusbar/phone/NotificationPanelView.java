@@ -34,6 +34,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.MathUtils;
@@ -50,6 +52,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.util.du.Utils;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
@@ -368,6 +371,7 @@ public class NotificationPanelView extends PanelView implements
         addView(mKeyguardBottomArea, index);
         initBottomArea();
         setDarkAmount(mDarkAmount);
+        setNotificationAlpha();
 
         setKeyguardStatusViewVisibility(mStatusBarState, false, false);
         setKeyguardBottomAreaVisibility(mStatusBarState, false);
@@ -1663,6 +1667,7 @@ public class NotificationPanelView extends PanelView implements
             alpha = getFadeoutAlpha();
         }
         mNotificationStackScroller.setAlpha(alpha);
+        setNotificationAlpha();
     }
 
     private float getFadeoutAlpha() {
@@ -2473,6 +2478,14 @@ public class NotificationPanelView extends PanelView implements
 
     public void setPanelScrimMinFraction(float minFraction) {
         mBar.panelScrimMinFractionChanged(minFraction);
+    }
+
+    private void setNotificationAlpha() {
+        if (!isOnKeyguard() && mPanelExpanded) {
+            mNotificationStackScroller.setBackgroundPaintAlpha(true);
+        } else {
+            mNotificationStackScroller.setBackgroundPaintAlpha(false);
+        }
     }
 
     public void clearNotificationEffects() {

@@ -6425,6 +6425,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_TILE_TITLE_VISIBILITY),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_PANEL_BG_ALPHA),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -6488,6 +6491,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     uri.equals(Settings.System.getUriFor(Settings.System.ANIM_TILE_DURATION)) ||
                     uri.equals(Settings.System.getUriFor(Settings.System.ANIM_TILE_INTERPOLATOR))) {
                 setQsPanelOptions();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.QS_PANEL_BG_ALPHA))) {
+                setNotificationAlpha();
             }
         }
 
@@ -6503,6 +6509,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateRecentsMode();
             updateTickerAnimation();
             updateQsPanelResources();
+            setNotificationAlpha();
         }
     }
 
@@ -6527,6 +6534,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void setQsPanelOptions() {
         if (mQSPanel != null) {
             mQSPanel.updateSettings();
+        }
+    }
+
+    private void setNotificationAlpha() {
+        if (mStackScroller != null) {
+            mStackScroller.updateSettings();
         }
     }
 

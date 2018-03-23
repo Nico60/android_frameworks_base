@@ -22,9 +22,14 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -137,6 +142,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private int mLowPriorityColor;
     private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
+    private int mNotificationAlpha;
 
     private float mNormalBackgroundVisibilityAmount;
     private ValueAnimator mFadeInFromDarkAnimator;
@@ -205,6 +211,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 makeInactive(true /* animate */);
             }
         }, this::performClick, this::handleSlideBack, mFalsingManager::onNotificationDoubleTap);
+        
+        Handler mHandler = new Handler();
+        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+        settingsObserver.observe();
     }
 
     @Override
@@ -236,6 +246,31 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mNormalRippleColor = mContext.getColor(R.color.notification_ripple_untinted_color);
         mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
+        updateSettings();
+    }
+
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            getContext().getContentResolver().registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.QS_PANEL_BG_ALPHA), false,
+                    this, UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateSettings();
+        }
+    }
+
+    private void updateSettings() {
+        mNotificationAlpha = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_PANEL_BG_ALPHA, 255,
+                UserHandle.USER_CURRENT);
+        mBackgroundNormal.setDrawableAlpha(mNotificationAlpha);
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {
@@ -520,11 +555,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         int newColor = calculateBgColor();
         setBackgroundTintColor(newColor);
         if (!isDimmable() && mNeedsDimming) {
-           mBackgroundNormal.setDrawableAlpha((int) NotificationUtils.interpolate(255,
+           mBackgroundNormal.setDrawableAlpha((int) NotificationUtils.interpolate(mNotificationAlpha,
                    mDimmedAlpha,
                    overrideAmount));
         } else {
-            mBackgroundNormal.setDrawableAlpha(255);
+            mBackgroundNormal.setDrawableAlpha(mNotificationAlpha);
         }
     }
 
@@ -672,6 +707,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     protected void updateBackground() {
         cancelFadeAnimations();
+        updateSettings();
         if (shouldHideBackground()) {
             mBackgroundDimmed.setVisibility(INVISIBLE);
             mBackgroundNormal.setVisibility(mActivated ? VISIBLE : INVISIBLE);

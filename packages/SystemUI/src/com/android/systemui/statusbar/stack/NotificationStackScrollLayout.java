@@ -36,6 +36,8 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
@@ -383,6 +385,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mCachedBackgroundColor;
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
     private Runnable mAnimateScroll = this::animateScroll;
+    private int mBackgroundPaintAlpha;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -523,6 +526,21 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
+        updateSettings();
+    }
+
+    public void updateSettings() {
+        mBackgroundPaintAlpha = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_PANEL_BG_ALPHA, 255,
+                UserHandle.USER_CURRENT);
+    }
+
+    public void setBackgroundPaintAlpha(boolean applyAlpha) {
+        if (applyAlpha) {
+            mBackgroundPaint.setAlpha(mBackgroundPaintAlpha);
+        } else {
+            mBackgroundPaint.setAlpha(255);
+        }
     }
 
     public void setDrawBackgroundAsSrc(boolean asSrc) {
