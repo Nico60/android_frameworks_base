@@ -554,13 +554,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mOverrideAmount = overrideAmount;
         int newColor = calculateBgColor();
         setBackgroundTintColor(newColor);
-        updateSettings();
         if (!isDimmable() && mNeedsDimming) {
            mBackgroundNormal.setDrawableAlpha((int) NotificationUtils.interpolate(mNotificationAlpha,
                    mDimmedAlpha,
                    overrideAmount));
         } else {
             mBackgroundNormal.setDrawableAlpha(mNotificationAlpha);
+            //mBackgroundDimmed.setDrawableAlpha(mNotificationAlpha);
         }
     }
 
@@ -708,6 +708,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     protected void updateBackground() {
         cancelFadeAnimations();
+        //updateSettings();
         if (shouldHideBackground()) {
             mBackgroundDimmed.setVisibility(INVISIBLE);
             mBackgroundNormal.setVisibility(mActivated ? VISIBLE : INVISIBLE);

@@ -498,6 +498,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mCachedBackgroundColor != color) {
             mCachedBackgroundColor = color;
             mBackgroundPaint.setColor(color);
+            updateSettings();
             invalidate();
         }
     }
@@ -589,6 +590,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
         updateFirstAndLastBackgroundViews();
         updateAlgorithmLayoutMinHeight();
+        updateSettings();
     }
 
     private void requestAnimationOnViewResize(ExpandableNotificationRow row) {
@@ -2198,7 +2200,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 return;
             } else {
                 // no new animation needed, let's just apply the value
-                setBackgroundBottom(newEndValue);
+                =(newEndValue);
                 return;
             }
         }
@@ -2243,10 +2245,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         mScrimController.setExcludedBackgroundArea(
-                mFadingOut || mParentNotFullyVisible || mAmbientState.isDark() || mIsClipped ? null
-                        : mCurrentBounds);
-        invalidate();
-    }
+            mBackgroundBounds.right = mTempInt2[0] + getWidth();
+        }
+        if (!mIsExpanded) {
+            mBackgroundBounds.top = 0;
 
     /**
      * Update the background bounds to the new desired bounds
@@ -2258,10 +2260,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             getLocationInWindow(mTempInt2);
             mBackgroundBounds.left = mTempInt2[0];
-            mBackgroundBounds.right = mTempInt2[0] + getWidth();
-        }
-        if (!mIsExpanded) {
-            mBackgroundBounds.top = 0;
             mBackgroundBounds.bottom = 0;
             return;
         }
