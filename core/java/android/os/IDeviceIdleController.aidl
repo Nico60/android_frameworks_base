@@ -45,6 +45,4 @@ interface IDeviceIdleController {
     void exitIdle(String reason);
     boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener);
     void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
-    int getIdleStateDetailed();
-    int getLightIdleStateDetailed();
 }
